@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	
+	<!--planetlayers are like onions. No I will not elaborate-->
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/PlanetLayerDef/worldDrawLayers</xpath>
+		<value>
+			<li>PlanetLayerVisualizer.WorldDrawLayer_ShowVisuals</li>
+		</value>
+	</Operation>
+
+
+</Patch>

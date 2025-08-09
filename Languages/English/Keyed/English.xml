@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+    <PLV_NoSelection>No tile selected</PLV_NoSelection>
+    <PLV_EnableUpdating>Enable updating?</PLV_EnableUpdating>
+    <PLV_SelectedTile>Selected tile: {0}</PLV_SelectedTile>
+    <PLV_SelectedCoordinates>Coordinates: {0}</PLV_SelectedCoordinates>
+    <PLV_SelectedBiome>Biome: {0} ({1}, {2})</PLV_SelectedBiome>
+    <PLV_SelectedRainfall>Rainfall: {0}</PLV_SelectedRainfall>
+    <PLV_SelectedElevation>Elevation {0}</PLV_SelectedElevation>
+    <PLV_SelectedPollution>Pollution {0}</PLV_SelectedPollution>
+    
+    <PLV_BiomeScoreDisplay>Biome: {0} Score:{1}</PLV_BiomeScoreDisplay>
+    <PLV_BiomeWord>Biome</PLV_BiomeWord>
+    <PLV_ScoreWord>Score</PLV_ScoreWord>
+    
+    
+    <PLV_LayerText_0>None</PLV_LayerText_0>
+    <PLV_LayerText_1>Rainfall</PLV_LayerText_1>
+    <PLV_LayerText_2>Elevation</PLV_LayerText_2>
+    <PLV_LayerText_3>Max Temperature</PLV_LayerText_3>
+    <PLV_LayerText_4>Min Temperature</PLV_LayerText_4>
+    <PLV_LayerText_5>Current Temperature</PLV_LayerText_5>
+    <PLV_LayerText_6>Movement Difficulty</PLV_LayerText_6>
+    <PLV_LayerText_7>Biome Score</PLV_LayerText_7>
+    <PLV_LayerText_8>Pollution</PLV_LayerText_8>
+    
+    
+    <PLV_SortBy>Sort by</PLV_SortBy>
+    <PLV_ScoreSort>Sort by score</PLV_ScoreSort>
+    <PLV_NameSort>Sort by name</PLV_NameSort>
+    
+    <PLV_CutoffText>Cutoff: {0}</PLV_CutoffText>
+    <PLV_AlphaDisplay>Alpha: {0}</PLV_AlphaDisplay>
+    <PLV_InvertCutoff>Invert cutoff</PLV_InvertCutoff>
+    <PLV_CountImpassable>Count impassable tiles</PLV_CountImpassable>
+    
+    
+    <PLV_StartLayerCalc>Calculate layer details</PLV_StartLayerCalc>
+    <PLV_CalculationProgress>Progress:\n {0}/{1}</PLV_CalculationProgress>
+    
+</LanguageData>

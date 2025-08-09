@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_None</defName>
+        <label>none</label>
+        <displayPriority>100</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_Rainfall</defName>
+        <label>rainfall</label>
+        <VisualLayerClass>PlanetLayerVisualizer.RainfallVisualLayer</VisualLayerClass>
+        <minValue>0</minValue>
+        <maxValue>5000</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>15</steps>
+        <colorStart>(255, 255, 255)</colorStart>
+        <colorEnd>(0,54,130)</colorEnd>
+        <displayPriority>99</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_Elevation</defName>
+        <label>elevation</label>
+        <VisualLayerClass>PlanetLayerVisualizer.ElevationVisualLayer</VisualLayerClass>
+        <minValue>-500</minValue>
+        <maxValue>3000</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>15</steps>
+        <colorStart>(255, 0, 0)</colorStart>
+        <colorEnd>(0,255,0)</colorEnd>
+        <displayPriority>98</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_MaxTemperature</defName>
+        <label>max temperature</label>
+        <VisualLayerClass>PlanetLayerVisualizer.MaxTempVisualLayer</VisualLayerClass>
+        <minValue>-50</minValue>
+        <maxValue>60</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>20</steps>
+        <colorStart>(0, 229, 255)</colorStart>
+        <colorEnd>(255,30,0)</colorEnd>
+        <displayPriority>97</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_MinTemperature</defName>
+        <label>min temperature</label>
+        <VisualLayerClass>PlanetLayerVisualizer.MinTempVisualLayer</VisualLayerClass>
+        <minValue>-50</minValue>
+        <maxValue>60</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>28</steps>
+        <colorStart>(255,0,165)</colorStart>
+        <colorEnd>(255,30,0)</colorEnd>
+        <displayPriority>96</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_CurTemperature</defName>
+        <label>current temperature</label>
+        <VisualLayerClass>PlanetLayerVisualizer.CurTempVisualLayer</VisualLayerClass>
+        <minValue>-50</minValue>
+        <maxValue>60</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>10</steps>
+        <colorStart>(0, 229, 255)</colorStart>
+        <colorEnd>(255,30,0)</colorEnd>
+        <displayPriority>95</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_BiomeScore</defName>
+        <label>biome score</label>
+        <VisualLayerClass>PlanetLayerVisualizer.BiomeScoreVisualLayer</VisualLayerClass>
+        <minValue>-30</minValue>
+        <maxValue>60</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <refreshOnTileMove>True</refreshOnTileMove>
+        <steps>15</steps>
+        <colorStart>(0,0,0)</colorStart>
+        <colorEnd>(0, 225, 255)</colorEnd>
+        <displayPriority>94</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_MovementDifficulty</defName>
+        <label>movement difficulty</label>
+        <VisualLayerClass>PlanetLayerVisualizer.MovementDifficultyVisualLayer</VisualLayerClass>
+        <minValue>0</minValue>
+        <maxValue>6</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>15</steps>
+        <colorStart>(0,255,0)</colorStart>
+        <colorEnd>(0, 0, 0)</colorEnd>
+        <displayPriority>93</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_Pollution</defName>
+        <label>pollution</label>
+        <VisualLayerClass>PlanetLayerVisualizer.PollutionVisualLayer</VisualLayerClass>
+        <minValue>0</minValue>
+        <maxValue>1</maxValue>
+        <valueCutoffMin>0</valueCutoffMin>
+        <valueCutoffMax>6000</valueCutoffMax>
+        <steps>15</steps>
+        <colorStart>(219,67,37)</colorStart>
+        <colorEnd>(0, 97, 100)</colorEnd>
+        <displayPriority>92</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+    
+
+</Defs>
