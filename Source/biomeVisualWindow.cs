@@ -7,7 +7,6 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
-using Verse.Noise;
 
 namespace PlanetLayerVisualizer;
 
@@ -24,9 +23,6 @@ public class BiomeVisualWindow : Window
     private float _layerMinElevation;
     private float _layerAvgElevation;
 
-    private float _maxTemperature;
-    private float _minTemperature;
-
     private float _layerMaxTemperature;
     private float _layerMinTemperature;
     private float _layerAvgTemperature;
@@ -35,16 +31,13 @@ public class BiomeVisualWindow : Window
     private float _layerMinPollution;
     private float _layerAvgPollution;
 
-    private float _layerlandmarkCount;
+    private int _layerLandmarkCount;
 
-    private float _forageability;
-    private float _pollution;
-    private float _nearPollution;
-    private float _diseaseFreq;
-    private int _totalBiomeCount = DefDatabase<BiomeDef>.DefCount;
+    private readonly int _totalBiomeCount = DefDatabase<BiomeDef>.DefCount;
 
     private readonly List<VisualizerDef> _possibleVisuals =
         DefDatabase<VisualizerDef>.AllDefsListForReading.OrderByDescending(x => x.displayPriority).ToList();
+
     public VisualizerDef DefLookingAt;
 
     private PlanetTile _selectedPlanetTile;
@@ -56,12 +49,14 @@ public class BiomeVisualWindow : Window
 
     private List<Tile> _listOfLayersTiles;
     private bool _currentlyCalculating = false;
+    private bool _startNewCalculation = false;
     private bool _finishedCalculating = false;
     private int _startingCount = 0;
 
     private const int IntervalToIncrement = 500;
 
-    private Dictionary<BiomeDef, ListOfTileSpecifics> _biomeSpecificDict;
+    /// int is the hash of the biomeDef
+    private Dictionary<int, ListOfTileSpecifics> _biomeSpecificDict;
 
     /// True sort by score, false sort by name
     private bool _biomeScoreSortLogic = true;
@@ -72,8 +67,8 @@ public class BiomeVisualWindow : Window
 
     private class BiomeAndScore(BiomeDef biome, float biomeScore)
     {
-        public BiomeDef Biome = biome;
-        public float BiomeScore = biomeScore;
+        public readonly BiomeDef Biome = biome;
+        public readonly float BiomeScore = biomeScore;
     }
 
     public SettingsOptions Settings = new();
@@ -100,7 +95,7 @@ public class BiomeVisualWindow : Window
         OnNoiseChanged();
     }
 
-    protected virtual void OnNoiseChanged() {
+    private static void OnNoiseChanged() {
         Find.World.renderer.SetDirty<WorldDrawLayer_ShowVisuals>(PlanetLayer.Selected);
     }
 
@@ -126,8 +121,6 @@ public class BiomeVisualWindow : Window
     private Rect _rightViewTopBar;
 
     private bool _initialLoad = true;
-
-    private const int TotalMenuNumbers = 8;
 
 
     public override void DoWindowContents(Rect rect) {
@@ -155,10 +148,10 @@ public class BiomeVisualWindow : Window
 
             _rightViewTopBar = _rightColumn.TopPart(0.15f);
             _rightOutRect = _rightColumn.BottomPart(0.85f);
-            _rightViewRect = new Rect(_rightColumn.x, _rightOutRect.y,
-                width: _rightColumn.width - 30f, // Width
+            _rightViewRect = new Rect(_rightOutRect.x,
+                _rightOutRect.y + 10f,
+                width: _rightOutRect.width - 30f,
                 height: 800);
-
 
             _initialLoad = false;
         }
@@ -177,17 +170,15 @@ public class BiomeVisualWindow : Window
     }
 
     private void RightColumnDisplay() {
-        /*
-         * TODO create Window_DebugTable using
-         * DebugTables.MakeTablesDialog
-         */
-
         //Listing_Standard listingStandardRight = new();
         //DebugTables.MakeTablesDialog();
         bool startWorldCalculation = Widgets.ButtonText(_rightViewTopBar.LeftHalf(),
             "PLV_StartLayerCalc".Translate());
         if (startWorldCalculation) {
+            _biomeSpecificDict.Clear();
             _currentlyCalculating = true;
+            _startNewCalculation = true;
+            _startingCount = 0;
         }
 
         if (_currentlyCalculating) {
@@ -205,10 +196,46 @@ public class BiomeVisualWindow : Window
             }
         }
 
-        Widgets.BeginScrollView(_rightOutRect, ref _rightScrollPosition, _rightViewRect);
+        //Widgets.BeginScrollView(_rightOutRect, ref _rightScrollPosition, _rightViewRect);
+
+        // var smallRect = new Rect(_rightColMinBox.x, _rightColMinBox.y, _rightColMinBox.width, 40f);
+        // Left side
+
+
+        float yValue = _rightViewRect.y+15;
+
+        DefLookingAt.CachedMinValue = Widgets.HorizontalSlider(
+            new Rect(_rightViewRect.x, yValue, _rightViewRect.width, 30f),
+            value: DefLookingAt.CachedMinValue, 
+            min: DefLookingAt.expectedMinMaxValue.min, max: DefLookingAt.expectedMinMaxValue.max,
+            leftAlignedLabel: "PLV_MinLabel".Translate(),
+            rightAlignedLabel: DefLookingAt.CachedMinValue.ToString(),
+            roundTo: 1);
+        yValue += 30;
+        DefLookingAt.CachedMaxValue = Widgets.HorizontalSlider(
+            new Rect(_rightViewRect.x, yValue, _rightViewRect.width, 30f),
+            value: DefLookingAt.CachedMaxValue, 
+            min: DefLookingAt.expectedMinMaxValue.min, max: DefLookingAt.expectedMinMaxValue.max,
+            leftAlignedLabel: "PLV_MaxLabel".Translate(),
+            rightAlignedLabel: DefLookingAt.CachedMaxValue.ToString(),
+            roundTo: 1
+        );
+        yValue += 30;
+        DefLookingAt.CachedSteps = (int)Widgets.HorizontalSlider(
+            new Rect(_rightViewRect.x, yValue, _rightViewRect.width, 30f),
+            value: DefLookingAt.CachedSteps, min: 0, max: 100,
+            leftAlignedLabel: "PLV_StepsLabel".Translate(),
+            rightAlignedLabel: DefLookingAt.CachedSteps.ToString(),
+            roundTo: 1
+        );
+
+        if (DefLookingAt.ValuesChanged()) {
+            DefLookingAt.UpdateValues();
+            Settings.CacheChanged = true;
+        }
 
         //listingStandardRight.End();
-        Widgets.EndScrollView();
+        //Widgets.EndScrollView();
     }
 
 
@@ -255,13 +282,14 @@ public class BiomeVisualWindow : Window
 
     private void CenterColumnDisplay() {
         Listing_Standard listingStandardCenter = new();
-        Widgets.BeginScrollView(_centerOutRect, ref _centerScrollPosition, _centerViewRect);
+        //Scrolling not needed for this column
+        //Widgets.BeginScrollView(_centerOutRect, ref _centerScrollPosition, _centerViewRect);
         listingStandardCenter.Begin(_centerViewRect);
         if (_selectedPlanetTile == PlanetTile.Invalid) {
             Widgets.Label(_centerViewRect, "PLV_NoSelection".Translate());
             //Log.Message("Planet layer is invalid");
             listingStandardCenter.End();
-            Widgets.EndScrollView();
+            //Widgets.EndScrollView();
             return;
         }
 
@@ -271,21 +299,21 @@ public class BiomeVisualWindow : Window
         Vector3 tileCenter = Find.WorldGrid.GetTileCenter(_selectedPlanetTile);
         listingStandardCenter.Label("PLV_SelectedTile".Translate(_selectedPlanetTile.tileId));
         listingStandardCenter.Label("PLV_SelectedCoordinates".Translate(tileCenter.ToString("0.#")));
-        
+
         Rect widgetSize = listingStandardCenter.GetRect(Text.LineHeight);
         if (Widgets.ButtonText(rect: widgetSize,
                 label: _possibleVisuals[Settings.ViewLookingAt].LabelCap)) {
             List<FloatMenuOption> list2 = [];
             for (int menuNumber = 0; menuNumber < _possibleVisuals.Count; menuNumber++) {
                 int menuHolder = menuNumber;
-                
+
                 list2.Add(new FloatMenuOption(_possibleVisuals[menuNumber].LabelCap,
                     delegate {
                         if (Settings.ViewLookingAt != menuHolder) {
                             Settings.ViewLookingAt = menuHolder;
                             Settings.CacheChanged = true;
                             DefLookingAt = _possibleVisuals[menuHolder];
-                            
+                            DefLookingAt.initializeValues();
                         }
                     }));
             }
@@ -333,7 +361,8 @@ public class BiomeVisualWindow : Window
         }
 
         listingStandardCenter.End();
-        Widgets.EndScrollView();
+        //Scrolling not needed for this column
+        //Widgets.EndScrollView();
     }
 
     private bool CacheChanged() {
@@ -384,14 +413,15 @@ public class BiomeVisualWindow : Window
 
     private void RecalculateLayerInfo() {
         if (!_selectedPlanetTile.Valid) return;
-        if (!Equals(_currentLayer, _selectedPlanetTile.Layer)) {
+        if (!Equals(_currentLayer, _selectedPlanetTile.Layer) || _startNewCalculation) {
+            _startNewCalculation = false;
             //Log.Message("Current layer has changed");
             _currentLayer = _selectedPlanetTile.Layer;
 
             _listOfLayersTiles = _currentLayer.Tiles;
             _cachedLayer = _currentLayer;
 
-            _biomeSpecificDict = new Dictionary<BiomeDef, ListOfTileSpecifics>();
+            _biomeSpecificDict = new Dictionary<int, ListOfTileSpecifics>();
             _totalTileCount = _currentLayer.TilesCount;
 
             _layerMaxRainFall = 0;
@@ -406,7 +436,7 @@ public class BiomeVisualWindow : Window
             _layerAvgTemperature = 0;
             _layerAvgPollution = 0;
             _layerAvgRainFall = 0;
-            _layerlandmarkCount = 0;
+            _layerLandmarkCount = 0;
         }
 
 
@@ -414,26 +444,18 @@ public class BiomeVisualWindow : Window
             int countToReach = _startingCount + IntervalToIncrement;
             if (countToReach > _totalTileCount)
                 countToReach = _totalTileCount;
-            for (int currentValueAt = _startingCount;
-                 currentValueAt < countToReach;
-                 currentValueAt++) {
-                if (_biomeSpecificDict.TryGetValue(_listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome,
+            for (int currentValueAt = _startingCount; currentValueAt < countToReach; currentValueAt++) {
+                if (_biomeSpecificDict.TryGetValue(
+                        _listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome.GetHashCode(),
                         out ListOfTileSpecifics biomeLookingAt)) {
                     biomeLookingAt.AddTileSpecifics(_listOfLayersTiles[currentValueAt].tile.Tile);
                 }
                 else {
-                    _biomeSpecificDict.Add(_listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome,
+                    Log.Message(
+                        "We are adding a new biome " + _listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome);
+                    _biomeSpecificDict.Add(_listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome.GetHashCode(),
                         new ListOfTileSpecifics(_listOfLayersTiles[currentValueAt].tile.Tile));
                 }
-                /*
-                _layerMaxRainFall = Math.Max(_layerMaxRainFall, _listOfLayersTiles[currentValueAt].rainfall);
-                _layerMinRainFall = Math.Min(_layerMinRainFall, _listOfLayersTiles[currentValueAt].rainfall);
-                _layerMaxElevation = Math.Max(_layerMaxElevation, _listOfLayersTiles[currentValueAt].elevation);
-                _layerMinElevation = Math.Min(_layerMinElevation, _listOfLayersTiles[currentValueAt].elevation);
-                _layerMaxTemperature =
-                    Math.Max(_layerMaxTemperature, _listOfLayersTiles[currentValueAt].MaxTemperature);
-                _layerMinTemperature =
-                    Math.Min(_layerMinTemperature, _listOfLayersTiles[currentValueAt].MinTemperature);*/
             }
 
             _startingCount = countToReach;
@@ -444,36 +466,88 @@ public class BiomeVisualWindow : Window
                 _currentlyCalculating = false;
                 _finishedCalculating = true;
 
-                foreach (KeyValuePair<BiomeDef, ListOfTileSpecifics> biomeStuff in _biomeSpecificDict) {
-                    _layerMaxRainFall = Math.Max(_layerMaxRainFall, biomeStuff.Value.BiomeMaxRainFall);
-                    _layerMinRainFall = Math.Min(_layerMinRainFall, biomeStuff.Value.BiomeMinRainFall);
-                    _layerMaxElevation = Math.Max(_layerMaxElevation, biomeStuff.Value.BiomeMaxElevation);
-                    _layerMinElevation = Math.Min(_layerMinElevation, biomeStuff.Value.BiomeMinElevation);
-                    _layerMaxTemperature = Math.Max(_layerMaxTemperature, biomeStuff.Value.BiomeMaxTemperature);
-                    _layerMinTemperature = Math.Min(_layerMinTemperature, biomeStuff.Value.BiomeMinTemperature);
-                    _layerMaxPollution = Math.Max(_layerMaxPollution, biomeStuff.Value.MaxPollution);
-                    _layerMinPollution = Math.Min(_layerMinPollution, biomeStuff.Value.MinPollution);
-                    _layerlandmarkCount += biomeStuff.Value.landMarkCount;
+                foreach (var biomeData in _biomeSpecificDict.Values) {
+                    _layerMaxRainFall = Math.Max(_layerMaxRainFall, biomeData.BiomeMaxRainFall);
+                    _layerMinRainFall = Math.Min(_layerMinRainFall, biomeData.BiomeMinRainFall);
+                    _layerMaxElevation = Math.Max(_layerMaxElevation, biomeData.BiomeMaxElevation);
+                    _layerMinElevation = Math.Min(_layerMinElevation, biomeData.BiomeMinElevation);
+                    _layerMaxTemperature = Math.Max(_layerMaxTemperature, biomeData.BiomeMaxTemperature);
+                    _layerMinTemperature = Math.Min(_layerMinTemperature, biomeData.BiomeMinTemperature);
+                    _layerMaxPollution = Math.Max(_layerMaxPollution, biomeData.BiomeMaxPollution);
+                    _layerMinPollution = Math.Min(_layerMinPollution, biomeData.BiomeMinPollution);
+                    _layerLandmarkCount += biomeData.LandmarkCount;
 
                     if (prevTileCount == 0) {
-                        _layerAvgRainFall = biomeStuff.Value.AvgRainfall;
-                        _layerAvgElevation = biomeStuff.Value.AvgElevation;
-                        _layerAvgTemperature = biomeStuff.Value.AvgTemperature;
-                        _layerAvgPollution = biomeStuff.Value.AvgPollution;
+                        // default values for first tile
+                        _layerAvgRainFall = biomeData.BiomeAvgRainfall;
+                        _layerAvgElevation = biomeData.BiomeAvgElevation;
+                        _layerAvgTemperature = biomeData.BiomeAvgTemperature;
+                        _layerAvgPollution = biomeData.BiomeAvgPollution;
                     }
                     else {
-                        _layerAvgRainFall = (_layerAvgRainFall + biomeStuff.Value.AvgRainfall) /
-                                            (prevTileCount + biomeStuff.Value.TileCount);
-                        _layerAvgElevation = (_layerAvgElevation + biomeStuff.Value.AvgElevation) /
-                                             (prevTileCount + biomeStuff.Value.TileCount);
-                        _layerAvgTemperature = (_layerAvgTemperature + biomeStuff.Value.AvgTemperature) /
-                                               (prevTileCount + biomeStuff.Value.TileCount);
-                        _layerAvgPollution = (_layerAvgPollution + biomeStuff.Value.AvgPollution) /
-                                             (prevTileCount + biomeStuff.Value.TileCount);
+                        _layerAvgRainFall = (_layerAvgRainFall * prevTileCount +
+                                             biomeData.BiomeAvgRainfall * biomeData.TileCount) /
+                                            (prevTileCount + biomeData.TileCount);
+                        _layerAvgElevation = (_layerAvgElevation * prevTileCount +
+                                              biomeData.BiomeAvgElevation * biomeData.TileCount) /
+                                             (prevTileCount + biomeData.TileCount);
+                        _layerAvgTemperature = (_layerAvgTemperature * prevTileCount +
+                                                biomeData.BiomeAvgTemperature * biomeData.TileCount) /
+                                               (prevTileCount + biomeData.TileCount);
+                        _layerAvgPollution = (_layerAvgPollution * prevTileCount +
+                                              biomeData.BiomeAvgPollution * biomeData.TileCount) /
+                                             (prevTileCount + biomeData.TileCount);
                     }
 
-                    prevTileCount = biomeStuff.Value.TileCount;
+                    prevTileCount = biomeData.TileCount;
                 }
+
+                //Total calculation of biomes gets stored as hash 0 just because
+                _biomeSpecificDict.Add(0, new ListOfTileSpecifics(_selectedTile));
+
+                _biomeSpecificDict.TryGetValue(0, out var tileSpecificStuff);
+
+                tileSpecificStuff?.AddTotalManually(
+                    "Total",
+                    "Total",
+                    "PlanetLayerVisualizer",
+                    _totalTileCount,
+                    _layerMaxRainFall,
+                    _layerMinRainFall,
+                    _layerAvgRainFall,
+                    _layerMaxTemperature,
+                    _layerMinTemperature,
+                    _layerAvgTemperature,
+                    _layerMaxElevation,
+                    _layerMinElevation,
+                    _layerAvgElevation,
+                    _layerMaxPollution,
+                    _layerMinPollution,
+                    _layerAvgPollution,
+                    _layerLandmarkCount
+                );
+
+                DebugTables.MakeTablesDialog(
+                    _biomeSpecificDict.Values.OrderBy(x => x.TileCount),
+                    new TableDataGetter<ListOfTileSpecifics>("biome defName", (x => x.SpecificBiomeDefName)),
+                    new TableDataGetter<ListOfTileSpecifics>("biome label", (x => x.SpecificBiomeName)),
+                    new TableDataGetter<ListOfTileSpecifics>("mod source", (x => x.BiomeModSource)),
+                    new TableDataGetter<ListOfTileSpecifics>("Tile Count", (x => x.TileCount)),
+                    new TableDataGetter<ListOfTileSpecifics>("Max Rainfall", (x => x.BiomeMaxRainFall)),
+                    new TableDataGetter<ListOfTileSpecifics>("Min Rainfall", (x => x.BiomeMinRainFall)),
+                    new TableDataGetter<ListOfTileSpecifics>("Avg Rainfall", (x => x.BiomeAvgRainfall)),
+                    new TableDataGetter<ListOfTileSpecifics>("Max Temp", (x => x.BiomeMaxTemperature)),
+                    new TableDataGetter<ListOfTileSpecifics>("Min Temp", (x => x.BiomeMinTemperature)),
+                    new TableDataGetter<ListOfTileSpecifics>("Avg Temp", (x => x.BiomeAvgTemperature)),
+                    new TableDataGetter<ListOfTileSpecifics>("Max Elevation", (x => x.BiomeMaxElevation)),
+                    new TableDataGetter<ListOfTileSpecifics>("Min Elevation", (x => x.BiomeMinElevation)),
+                    new TableDataGetter<ListOfTileSpecifics>("Avg Elevation", (x => x.BiomeAvgElevation)),
+                    new TableDataGetter<ListOfTileSpecifics>("Max Pollution", (x => x.BiomeMaxPollution)),
+                    new TableDataGetter<ListOfTileSpecifics>("Min Pollution", (x => x.BiomeMinPollution)),
+                    new TableDataGetter<ListOfTileSpecifics>("Avg Pollution", (x => x.BiomeAvgPollution)),
+                    new TableDataGetter<ListOfTileSpecifics>("Landmark Count", (x => x.LandmarkCount))
+                );
+
 
                 Log.Message("Planet layer calculations completed!");
             }

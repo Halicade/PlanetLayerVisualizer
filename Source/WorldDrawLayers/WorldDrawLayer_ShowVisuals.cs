@@ -43,17 +43,6 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
             yield return item;
         }
 
-        /*
-         * Rainfall shift
-         * FFFFFF
-         * D5DEEA
-         * AABCD5
-         * 809BC1
-         * 5579AC
-         * 2B5897
-         * 003682
-         */
-
         if (window.DefLookingAt == VisualizerDefOf.PLV_None)
             yield break;
 
@@ -71,24 +60,25 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
         NativeArray<Vector3> unsafeVerts = planetLayer.UnsafeVerts;
 
         _triangleIndexToTileID.Clear();
-        Log.Message("Hopefully should be visualing somewthing");
         for (int i = 0; i < planetLayer.TilesCount; i++) {
             PlanetTile tileForID = planetLayer.PlanetTileForID(i);
             //Vector3 tileCenter = Find.WorldGrid.GetTileCenter(new PlanetTile(i, planetLayer));
             //num is originally the perlin. Now the rainfall
             if (!_settings.countImpassable) {
-                if (!Find.WorldPathGrid.PassableFast(tileForID) ) {
+                if (!Find.WorldPathGrid.PassableFast(tileForID)) {
                     continue;
                 }
             }
 
             float valueLookingAt = defLookingAt.Worker.RetrieveData(tileForID, _settings.TileLookingAt);
 
-
-            if ((!_settings.InvertCutoff && _settings.Cutoff != 0f && valueLookingAt < _settings.Cutoff &&
-                 _settings.CutoffEnabled)
-                || (_settings.InvertCutoff && !Mathf.Approximately(_settings.Cutoff, 3000) &&
-                    valueLookingAt > _settings.Cutoff && _settings.CutoffEnabled)) {
+            if ((!_settings.InvertCutoff
+                 && _settings.Cutoff != 0f
+                 && valueLookingAt < _settings.Cutoff
+                 && _settings.CutoffEnabled)
+                || (_settings.InvertCutoff
+                    && !Mathf.Approximately(_settings.Cutoff, defLookingAt.expectedMinMaxValue.max)
+                    && valueLookingAt > _settings.Cutoff && _settings.CutoffEnabled)) {
                 continue;
             }
 
@@ -130,5 +120,4 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
 
         FinalizeMesh(MeshParts.All);
     }
-
 }

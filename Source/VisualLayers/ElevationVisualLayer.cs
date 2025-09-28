@@ -8,6 +8,6 @@ namespace PlanetLayerVisualizer;
 public class ElevationVisualLayer : VisualLayer
 {
     public override float RetrieveData(PlanetTile tile, Tile selectedTile) {
-        return tile.Tile.rainfall;
+        return tile.Tile.elevation;
     }
 }

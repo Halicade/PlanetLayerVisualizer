@@ -38,4 +38,8 @@
     <PLV_StartLayerCalc>Calculate layer details</PLV_StartLayerCalc>
     <PLV_CalculationProgress>Progress:\n {0}/{1}</PLV_CalculationProgress>
     
+    <PLV_MinLabel>Min:</PLV_MinLabel>
+    <PLV_MaxLabel>Max:</PLV_MaxLabel>
+    <PLV_StepsLabel>Steps:</PLV_StepsLabel>
+    
 </LanguageData>

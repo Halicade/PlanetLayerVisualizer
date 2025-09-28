@@ -7,10 +7,10 @@ namespace PlanetLayerVisualizer;
 public class VisualizerDef : Def
 {
     public float minValue = 0f;
-
     public float maxValue = 100f;
-    public float valueCutoffMin = 0;
-    public float valueCutoffMax = 100f;
+    
+    public FloatRange expectedMinMaxValue = new(0,100);
+    
     public int steps = 10;
 
     //Higher is closer to top
@@ -22,7 +22,30 @@ public class VisualizerDef : Def
 
     public Type VisualLayerClass;
 
-    private VisualLayer worker;
+    private VisualLayer _worker;
 
-    public VisualLayer Worker => worker ??= GenWorker<VisualLayer>.Get(VisualLayerClass);
+    
+    
+    public float CachedMaxValue;
+    public float CachedMinValue;
+    public int CachedSteps;
+
+    public bool ValuesChanged() => !Mathf.Approximately(maxValue, CachedMaxValue) ||
+                                   !Mathf.Approximately(minValue, CachedMinValue) || 
+                                   steps != CachedSteps;
+
+    public void initializeValues() {
+        CachedMaxValue = maxValue;
+        CachedMinValue = minValue;
+        CachedSteps = steps;
+    }
+    
+    public void UpdateValues() {
+        maxValue = CachedMaxValue;
+        minValue = CachedMinValue;
+        steps = CachedSteps;
+    }
+
+
+    public VisualLayer Worker => _worker ??= GenWorker<VisualLayer>.Get(VisualLayerClass);
 }
