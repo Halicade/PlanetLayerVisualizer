@@ -4,7 +4,7 @@
     <PLV_EnableUpdating>Enable updating?</PLV_EnableUpdating>
     <PLV_SelectedTile>Selected tile: {0}</PLV_SelectedTile>
     <PLV_SelectedCoordinates>Coordinates: {0}</PLV_SelectedCoordinates>
-    <PLV_SelectedBiome>Biome: {0} ({1}, {2})</PLV_SelectedBiome>
+    <PLV_SelectedBiome>Biome: {0}\ndefName: {1}\nmod: {2}</PLV_SelectedBiome>
     <PLV_SelectedRainfall>Rainfall: {0}</PLV_SelectedRainfall>
     <PLV_SelectedElevation>Elevation {0}</PLV_SelectedElevation>
     <PLV_SelectedPollution>Pollution {0}</PLV_SelectedPollution>

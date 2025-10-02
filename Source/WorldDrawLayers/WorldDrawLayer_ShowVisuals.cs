@@ -93,11 +93,6 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
             int num3 = ((i + 1 < unsafeTileIDToVertsOffsets.Length)
                 ? unsafeTileIDToVertsOffsets[i + 1]
                 : unsafeVerts.Length);
-            //byte rainValue = (byte)Mathf.Lerp(0, 255, rainfallDecimal);
-            /*
-            float normalizedValue = Mathf.Clamp(((valueLookingAt - minValue) / (maxValue - minValue)),0f,0.4f);
-            float lerpedValue = Mathf.Lerp(0.0f, 1.0f, normalizedValue);*/
-            //Log.Message("elevation normalized is " + elevationValue);
             for (int j = unsafeTileIDToVertsOffsets[i]; j < num3; j++) {
                 subMesh.verts.Add(unsafeVerts[j]);
 
