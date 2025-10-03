@@ -26,7 +26,7 @@
         <VisualLayerClass>PlanetLayerVisualizer.ElevationVisualLayer</VisualLayerClass>
         <minValue>-500</minValue>
         <maxValue>3000</maxValue>
-        <expectedMinMaxValue>-1000~4000</expectedMinMaxValue>
+        <expectedMinMaxValue>-1000~5000</expectedMinMaxValue>
         <steps>15</steps>
         <colorStart>(0, 255, 0)</colorStart>
         <colorEnd>(255,0,0)</colorEnd>
@@ -38,7 +38,7 @@
         <label>max temperature</label>
         <VisualLayerClass>PlanetLayerVisualizer.MaxTempVisualLayer</VisualLayerClass>
         <minValue>-50</minValue>
-        <maxValue>60</maxValue>
+        <maxValue>50</maxValue>
         <expectedMinMaxValue>-100~100</expectedMinMaxValue>
         <steps>20</steps>
         <colorStart>(0, 229, 255)</colorStart>
@@ -51,7 +51,7 @@
         <label>min temperature</label>
         <VisualLayerClass>PlanetLayerVisualizer.MinTempVisualLayer</VisualLayerClass>
         <minValue>-50</minValue>
-        <maxValue>60</maxValue>
+        <maxValue>50</maxValue>
         <expectedMinMaxValue>-100~100</expectedMinMaxValue>
         <steps>28</steps>
         <colorStart>(255,0,165)</colorStart>
@@ -65,7 +65,7 @@
         <label>current temperature</label>
         <VisualLayerClass>PlanetLayerVisualizer.CurTempVisualLayer</VisualLayerClass>
         <minValue>-50</minValue>
-        <maxValue>60</maxValue>
+        <maxValue>50</maxValue>
         <expectedMinMaxValue>-100~100</expectedMinMaxValue>
         <steps>10</steps>
         <colorStart>(0, 229, 255)</colorStart>

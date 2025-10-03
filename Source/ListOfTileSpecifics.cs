@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using RimWorld;
 using RimWorld.Planet;
 
 namespace PlanetLayerVisualizer;
 
 internal class ListOfTileSpecifics(Tile biomeInfo)
 {
-    public BiomeDef SpecificBiome = biomeInfo.PrimaryBiome;
     public string SpecificBiomeDefName = biomeInfo.PrimaryBiome.defName;
     public string SpecificBiomeName = biomeInfo.PrimaryBiome.label;
     public string BiomeModSource = biomeInfo.PrimaryBiome?.modContentPack?.Name;

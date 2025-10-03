@@ -23,18 +23,16 @@ public class VisualizerDef : Def
     public Type VisualLayerClass;
 
     private VisualLayer _worker;
-
-    
     
     public float CachedMaxValue;
     public float CachedMinValue;
     public int CachedSteps;
 
-    public bool ValuesChanged() => !Mathf.Approximately(maxValue, CachedMaxValue) ||
+    public bool SliderValueChanged() => !Mathf.Approximately(maxValue, CachedMaxValue) ||
                                    !Mathf.Approximately(minValue, CachedMinValue) || 
                                    steps != CachedSteps;
 
-    public void initializeValues() {
+    public void InitializeValues() {
         CachedMaxValue = maxValue;
         CachedMinValue = minValue;
         CachedSteps = steps;

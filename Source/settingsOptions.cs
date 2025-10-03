@@ -4,21 +4,15 @@ using RimWorld.Planet;
 
 namespace PlanetLayerVisualizer;
 
-public class SettingsOptions
+public static class SettingsOptions
 {
-    public float Alpha = 1;
-    public float Cutoff;
-    public bool CutoffEnabled = true;
-    public bool InvertCutoff = false;
-    public int ViewLookingAt = 0;
-    public bool ToggleUpdate = true;
-    public bool CacheChanged = false;
-    public Tile TileLookingAt;
-    public bool countImpassable = false;
-
-
-
-    public SettingsOptions() {
-        Cutoff = 0;
-    }
+    public static float Alpha = 1;
+    public static float Cutoff=0;
+    public static bool CutoffEnabled = true;
+    public static bool InvertCutoff = false;
+    public static int ViewLookingAt = 0;
+    public static bool ToggleUpdate = true;
+    public static bool CacheChanged = false;
+    public static Tile TileLookingAt;
+    public static bool countImpassable = false;
 }

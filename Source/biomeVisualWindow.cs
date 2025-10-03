@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using LudeonTK;
 using RimWorld;
@@ -42,18 +41,18 @@ public class BiomeVisualWindow : Window
 
     private PlanetTile _selectedPlanetTile;
     private Tile _selectedTile;
+    private Vector3 _tileCenter;
     private PlanetTile _cachedPlanetTile;
-    private PlanetLayer _currentLayer = null;
-    private PlanetLayer _cachedLayer = null;
+    private PlanetLayer _currentLayer;
     private int _totalTileCount;
 
     private List<Tile> _listOfLayersTiles;
-    private bool _currentlyCalculating = false;
-    private bool _startNewCalculation = false;
-    private bool _finishedCalculating = false;
-    private int _startingCount = 0;
+    private bool _currentlyCalculating;
+    private bool _startNewCalculation;
+    private int _startingCount;
 
     private const int IntervalToIncrement = 500;
+    private const float SliderHeight = 20f;
 
     /// int is the hash of the biomeDef
     private Dictionary<int, ListOfTileSpecifics> _biomeSpecificDict;
@@ -61,46 +60,38 @@ public class BiomeVisualWindow : Window
     /// True sort by score, false sort by name
     private bool _biomeScoreSortLogic = true;
 
-    private bool _biomeScoreButton = false;
+    private bool _biomeScoreButton;
 
     private readonly List<BiomeAndScore> _biomeScoreList = [];
 
     private class BiomeAndScore(BiomeDef biome, float biomeScore)
     {
         public readonly BiomeDef Biome = biome;
-        public readonly String BiomeLabelCached = GetSubstring(biome.defName,15);
+        public readonly string BiomeLabelCached = GetSubstring(biome.label, 14);
         public readonly float BiomeScore = biomeScore;
         public readonly string BiomeScoreCached = biomeScore.ToString("0.##");
 
-        public readonly TipSignal tipSig = new TipSignal("PLV_SelectedBiome".Translate(biome.label, biome.defName,
-            biome?.modContentPack?.PackageId));
+        public readonly TipSignal TipSig = new("PLV_SelectedBiome".Translate(biome.label, biome.defName,
+            biome.modContentPack?.PackageId));
     }
 
-    public SettingsOptions Settings = new();
 
     public override Vector2 InitialSize => new(700f, 550f);
-    /*
-    protected override void SetInitialSizeAndPosition() {
-        base.SetInitialSizeAndPosition();
-
-        windowRect.x = ((float)UI.screenWidth - windowRect.width) / 2f;
-        windowRect.y = ((float)UI.screenHeight - windowRect.height) / 2f;
-
-    }*/
 
     public override void PreOpen() {
         base.PreOpen();
-        OnNoiseChanged();
+        OnVisualsChanged();
         _initialLoad = true;
         DefLookingAt = _possibleVisuals[0];
+        SettingsOptions.ViewLookingAt = 0;
     }
 
     public override void PostClose() {
         base.PostClose();
-        OnNoiseChanged();
+        OnVisualsChanged();
     }
 
-    private static void OnNoiseChanged() {
+    private static void OnVisualsChanged() {
         Find.World.renderer.SetDirty<WorldDrawLayer_ShowVisuals>(PlanetLayer.Selected);
     }
 
@@ -113,15 +104,6 @@ public class BiomeVisualWindow : Window
     private Rect _biomeNameCol;
 
     private Rect _biomeScoreCol;
-
-/*
-    private Rect _centerColumn;
-    private Rect _centerOutRect;
-    private Rect _centerViewRect;
-
-
-    private Rect _rightOutRect;
-    */
     private Rect _rightColumn;
 
 
@@ -130,25 +112,21 @@ public class BiomeVisualWindow : Window
 
     public override void DoWindowContents(Rect rect) {
         if (!Find.World.renderer.TryGetLayer<WorldDrawLayer_ShowVisuals>(PlanetLayer.Selected, out var _)) return;
-
+        //For some reason, the font likes to change size if dev mode window is open. 
+        Text.Font = GameFont.Small;
+        
         if (_initialLoad) {
             _leftColumn = rect.LeftPart(0.33f);
-            _rightColumn = rect.RightPart(0.66f);
+            _rightColumn = rect.RightPart(0.65f);
 
-            // +30 is for the top row button
-            _leftOutRect = new Rect(_leftColumn.x, _leftColumn.y + 30f, _leftColumn.width, _leftColumn.height - 30f);
+            _leftOutRect = new Rect(_leftColumn.x, _leftColumn.y + SliderHeight, _leftColumn.width,
+                _leftColumn.height - SliderHeight);
             _biomeColViewRect = new Rect(_leftColumn.x, _leftColumn.y,
-                width: _leftColumn.width - 30f, // Width
+                width: _leftColumn.width - SliderHeight,
                 height: Text.LineHeight * (_totalBiomeCount + 1));
 
             _biomeNameCol = _biomeColViewRect.LeftPart(0.7f);
             _biomeScoreCol = _biomeColViewRect.RightPart(0.3f);
-
-
-            _rightColumn = new Rect(_rightColumn.x + 10,
-                _rightColumn.y,
-                width: _rightColumn.width - 10f,
-                height: 550);
 
             _initialLoad = false;
         }
@@ -160,22 +138,16 @@ public class BiomeVisualWindow : Window
         RightColumnDisplay();
 
 
-        if (Settings.ToggleUpdate && CacheChanged()) {
-            OnNoiseChanged();
+        if (SettingsOptions.ToggleUpdate && CacheChanged()) {
+            OnVisualsChanged();
         }
     }
 
     private void RightColumnDisplay() {
-        //Listing_Standard listingStandardRight = new();
-        //DebugTables.MakeTablesDialog();
-
         float yValue = _rightColumn.y;
 
         if (_selectedPlanetTile == PlanetTile.Invalid) {
             Widgets.Label(_rightColumn, "PLV_NoSelection".Translate());
-            //Log.Message("Planet layer is invalid");
-
-            //Widgets.EndScrollView();
             return;
         }
 
@@ -193,134 +165,139 @@ public class BiomeVisualWindow : Window
 
 
         if (_currentlyCalculating) {
-            Log.Warning("Y value was " + yValue);
             Widgets.Label(
                 new Rect(_rightColumn.x + _rightColumn.width / 2, _rightColumn.y, _rightColumn.width / 2, 30),
                 ref yValue,
                 "PLV_CalculationProgress".Translate(_startingCount, _totalTileCount)
             );
-            Log.Message("Y value is " + yValue);
         }
         else {
             yValue += 38;
         }
 
+        Widgets.CheckboxLabeled(new Rect(_rightColumn.x, yValue, _rightColumn.width, Widgets.CheckboxSize),
+            "PLV_EnableUpdating".Translate(), ref SettingsOptions.ToggleUpdate);
+        yValue += Widgets.CheckboxSize;
 
-        //Scrolling not needed for this column
-        //Widgets.BeginScrollView(_centerOutRect, ref _centerScrollPosition, _centerViewRect);
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedTile".Translate(_selectedPlanetTile.tileId));
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedCoordinates".Translate(_tileCenter.ToString("0.#")));
 
-
-        Listing_Standard listingStandardCenter = new();
-
-        listingStandardCenter.Begin(
-            new Rect(_rightColumn.x,
-                _rightColumn.y + yValue,
-                _rightColumn.width,
-                _rightColumn.height - yValue));
-        listingStandardCenter.CheckboxLabeled("PLV_EnableUpdating".Translate(), ref Settings.ToggleUpdate);
-
-        Vector3 tileCenter = Find.WorldGrid.GetTileCenter(_selectedPlanetTile);
-        listingStandardCenter.Label("PLV_SelectedTile".Translate(_selectedPlanetTile.tileId));
-        listingStandardCenter.Label("PLV_SelectedCoordinates".Translate(tileCenter.ToString("0.#")));
-
-        Rect widgetSize = listingStandardCenter.GetRect(Text.LineHeight);
+        Rect widgetSize = new Rect(_rightColumn.x, yValue, _rightColumn.width, 20f);
         if (Widgets.ButtonText(rect: widgetSize,
-                label: _possibleVisuals[Settings.ViewLookingAt].LabelCap)) {
+                label: _possibleVisuals[SettingsOptions.ViewLookingAt].LabelCap)) {
             List<FloatMenuOption> list2 = [];
             for (int menuNumber = 0; menuNumber < _possibleVisuals.Count; menuNumber++) {
                 int menuHolder = menuNumber;
 
                 list2.Add(new FloatMenuOption(_possibleVisuals[menuNumber].LabelCap,
                     delegate {
-                        if (Settings.ViewLookingAt != menuHolder) {
-                            Settings.ViewLookingAt = menuHolder;
-                            Settings.CacheChanged = true;
+                        if (SettingsOptions.ViewLookingAt != menuHolder) {
+                            SettingsOptions.ViewLookingAt = menuHolder;
+                            SettingsOptions.CacheChanged = true;
                             DefLookingAt = _possibleVisuals[menuHolder];
-                            DefLookingAt.initializeValues();
+                            DefLookingAt.InitializeValues();
                         }
                     }));
             }
 
+
             Find.WindowStack.Add(new FloatMenu(list2));
         }
 
-        listingStandardCenter.Label("PLV_SelectedBiome".Translate(_selectedBiome.label, _selectedBiome.defName,
+        yValue += 20;
+
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedBiome".Translate(_selectedBiome.label,
+            _selectedBiome.defName,
             _selectedBiome?.modContentPack?.PackageId));
-        listingStandardCenter.Label("PLV_SelectedRainfall".Translate(_selectedRainFall));
-        listingStandardCenter.Label("PLV_SelectedElevation".Translate(_selectedElevation));
-        listingStandardCenter.Label("PLV_SelectedPollution".Translate(_selectedPollution));
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedRainfall".Translate(_selectedRainFall));
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedElevation".Translate(_selectedElevation));
+        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedPollution".Translate(_selectedPollution));
 
-        bool cachedImpassable = Settings.countImpassable;
-        listingStandardCenter.CheckboxLabeled("PLV_CountImpassable".Translate(), ref cachedImpassable);
-        if (!cachedImpassable.Equals(Settings.countImpassable)) {
-            Settings.countImpassable = cachedImpassable;
-            Settings.CacheChanged = true;
+        bool cachedImpassable = SettingsOptions.countImpassable;
+        Widgets.CheckboxLabeled(new Rect(_rightColumn.x, yValue, _rightColumn.width / 2, Widgets.CheckboxSize),
+            "PLV_CountImpassable".Translate(), ref cachedImpassable);
+        yValue += Widgets.CheckboxSize + 10;
+
+        if (!cachedImpassable.Equals(SettingsOptions.countImpassable)) {
+            SettingsOptions.countImpassable = cachedImpassable;
+            SettingsOptions.CacheChanged = true;
         }
 
-        float cachedCutoffValue = listingStandardCenter.SliderLabeled(
-            label: "PLV_CutoffText".Translate($"{Settings.Cutoff:0000}"), val: Settings.Cutoff,
-            min: DefLookingAt.minValue, max: DefLookingAt.maxValue);
+        float cachedCutoffValue = Widgets.HorizontalSlider(
+            new Rect(_rightColumn.x, yValue, _rightColumn.width, SliderHeight),
+            value: SettingsOptions.Cutoff,
+            min: DefLookingAt.expectedMinMaxValue.min, max: DefLookingAt.expectedMinMaxValue.max,
+            leftAlignedLabel: "PLV_CutoffText".Translate(SettingsOptions.Cutoff),
+            roundTo: 1);
+        yValue += 24;
 
-        if (!Mathf.Approximately(cachedCutoffValue, Settings.Cutoff)) {
-            Settings.Cutoff = cachedCutoffValue;
-            Settings.CacheChanged = true;
+        if (!Mathf.Approximately(cachedCutoffValue, SettingsOptions.Cutoff)) {
+            SettingsOptions.Cutoff = cachedCutoffValue;
+            SettingsOptions.CacheChanged = true;
         }
 
-        bool cachedCutoff = Settings.InvertCutoff;
-        listingStandardCenter.CheckboxLabeled("PLV_InvertCutoff".Translate(), ref cachedCutoff);
-        if (!cachedCutoff.Equals(Settings.InvertCutoff)) {
-            Settings.InvertCutoff = cachedCutoff;
-            Settings.CacheChanged = true;
+        bool cachedCutoff = SettingsOptions.InvertCutoff;
+
+
+        Widgets.CheckboxLabeled(new Rect(_rightColumn.x, yValue, _rightColumn.width / 2, Widgets.CheckboxSize),
+            "PLV_InvertCutoff".Translate(), ref cachedCutoff);
+        yValue += Widgets.CheckboxSize + 10;
+
+        if (!cachedCutoff.Equals(SettingsOptions.InvertCutoff)) {
+            SettingsOptions.InvertCutoff = cachedCutoff;
+            SettingsOptions.CacheChanged = true;
         }
 
-        float cachedAlpha = listingStandardCenter.SliderLabeled(
-            label: "PLV_AlphaDisplay".Translate($"{Settings.Alpha * 100f:0}"),
-            val: Settings.Alpha,
-            min: 0,
-            max: 1);
-        if (!Mathf.Approximately(cachedAlpha, Settings.Alpha)) {
-            Settings.Alpha = cachedAlpha;
-            Settings.CacheChanged = true;
-        }
 
-        yValue += listingStandardCenter.CurHeight + 15;
-        listingStandardCenter.End();
+        float cachedAlpha = Widgets.HorizontalSlider(
+            new Rect(_rightColumn.x, yValue, _rightColumn.width, SliderHeight),
+            value: SettingsOptions.Alpha,
+            min: 0, max: 1,
+            leftAlignedLabel: "PLV_AlphaDisplay".Translate($"{SettingsOptions.Alpha * 100f:0}"));
+        yValue += SliderHeight + 20f;
+
+        if (!Mathf.Approximately(cachedAlpha, SettingsOptions.Alpha)) {
+            SettingsOptions.Alpha = cachedAlpha;
+            SettingsOptions.CacheChanged = true;
+        }
 
 
         DefLookingAt.CachedMinValue = Widgets.HorizontalSlider(
-            new Rect(_rightColumn.x, yValue, _rightColumn.width, 30f),
+            new Rect(_rightColumn.x, yValue, _rightColumn.width, SliderHeight),
             value: DefLookingAt.CachedMinValue,
             min: DefLookingAt.expectedMinMaxValue.min, max: DefLookingAt.expectedMinMaxValue.max,
             leftAlignedLabel: "PLV_MinLabel".Translate(),
             rightAlignedLabel: DefLookingAt.CachedMinValue.ToString(),
             roundTo: 1);
-        yValue += 30;
+        yValue += SliderHeight + 20f;
+
         DefLookingAt.CachedMaxValue = Widgets.HorizontalSlider(
-            new Rect(_rightColumn.x, yValue, _rightColumn.width, 30f),
+            new Rect(_rightColumn.x, yValue, _rightColumn.width, SliderHeight),
             value: DefLookingAt.CachedMaxValue,
             min: DefLookingAt.expectedMinMaxValue.min, max: DefLookingAt.expectedMinMaxValue.max,
             leftAlignedLabel: "PLV_MaxLabel".Translate(),
             rightAlignedLabel: DefLookingAt.CachedMaxValue.ToString(),
             roundTo: 1
         );
-        yValue += 30;
+        yValue += SliderHeight + 20f;
         DefLookingAt.CachedSteps = (int)Widgets.HorizontalSlider(
-            new Rect(_rightColumn.x, yValue, _rightColumn.width, 30f),
+            new Rect(_rightColumn.x, yValue, _rightColumn.width, SliderHeight),
             value: DefLookingAt.CachedSteps, min: 2, max: 100,
             leftAlignedLabel: "PLV_StepsLabel".Translate(),
             rightAlignedLabel: DefLookingAt.CachedSteps.ToString(),
             roundTo: 1
         );
 
-        if (DefLookingAt.ValuesChanged()) {
+        if (DefLookingAt.SliderValueChanged()) {
             DefLookingAt.UpdateValues();
-            Settings.CacheChanged = true;
+            SettingsOptions.CacheChanged = true;
         }
     }
 
 
     private void LeftColumnDisplay() {
-        _biomeScoreButton = Widgets.ButtonText(new Rect(_leftColumn.x, _leftColumn.y, _leftColumn.width - 30f, 25f),
+        _biomeScoreButton = Widgets.ButtonText(
+            new Rect(_leftColumn.x, _leftColumn.y, _leftColumn.width - 30f, 25f),
             _biomeScoreSortLogic ? "PLV_ScoreSort".Translate() : "PLV_NameSort".Translate());
         Widgets.BeginScrollView(_leftOutRect, ref _leftScrollPosition, _biomeColViewRect);
 
@@ -329,8 +306,8 @@ public class BiomeVisualWindow : Window
             _cachedPlanetTile = PlanetTile.Invalid;
         }
 
-        float yName = 0f;
-        float yScore = 0f;
+        float yName = 5f;
+        float yScore = 5f;
         Widgets.Label(
             x: _biomeNameCol.x,
             text: "PLV_BiomeWord".Translate(),
@@ -348,7 +325,7 @@ public class BiomeVisualWindow : Window
                 text: biomeScore.BiomeLabelCached,
                 x: _biomeNameCol.x,
                 width: _biomeNameCol.width,
-                tip: biomeScore.tipSig);
+                tip: biomeScore.TipSig);
 
             Widgets.Label(
                 curY: ref yScore,
@@ -365,9 +342,9 @@ public class BiomeVisualWindow : Window
     }
 
 
-    private bool CacheChanged() {
-        if (Settings.CacheChanged) {
-            Settings.CacheChanged = false;
+    private static bool CacheChanged() {
+        if (SettingsOptions.CacheChanged) {
+            SettingsOptions.CacheChanged = false;
             return true;
         }
 
@@ -381,15 +358,16 @@ public class BiomeVisualWindow : Window
         if (!_selectedPlanetTile.Valid) return;
 
         _selectedTile = _selectedPlanetTile.Tile;
+        _tileCenter = Find.WorldGrid.GetTileCenter(_selectedPlanetTile);
         _selectedBiome = _selectedPlanetTile.Tile.PrimaryBiome;
         _selectedRainFall = _selectedPlanetTile.Tile.rainfall;
         _selectedElevation = _selectedTile.elevation;
         _selectedPollution = _selectedTile.pollution;
 
-        Settings.TileLookingAt = _selectedPlanetTile.Tile;
+        SettingsOptions.TileLookingAt = _selectedPlanetTile.Tile;
 
         if (DefLookingAt.refreshOnTileMove) {
-            Settings.CacheChanged = true;
+            SettingsOptions.CacheChanged = true;
         }
 
         _biomeScoreList.Clear();
@@ -398,7 +376,6 @@ public class BiomeVisualWindow : Window
             if (biome.implemented && biome.generatesNaturally &&
                 biome.Worker.CanPlaceOnLayer(biome, _selectedTile.Layer)) {
                 float score = biome.Worker.GetScore(biome, _selectedTile, _selectedPlanetTile);
-                //Log.Message("Score at tile for Biome " + biome.label + " is " + score);
                 _biomeScoreList.Add(new BiomeAndScore(biome, score));
             }
         }
@@ -415,11 +392,9 @@ public class BiomeVisualWindow : Window
         if (!_selectedPlanetTile.Valid) return;
         if (!Equals(_currentLayer, _selectedPlanetTile.Layer) || _startNewCalculation) {
             _startNewCalculation = false;
-            //Log.Message("Current layer has changed");
             _currentLayer = _selectedPlanetTile.Layer;
 
             _listOfLayersTiles = _currentLayer.Tiles;
-            _cachedLayer = _currentLayer;
 
             _biomeSpecificDict = new Dictionary<int, ListOfTileSpecifics>();
             _totalTileCount = _currentLayer.TilesCount;
@@ -437,6 +412,7 @@ public class BiomeVisualWindow : Window
             _layerAvgPollution = 0;
             _layerAvgRainFall = 0;
             _layerLandmarkCount = 0;
+            SettingsOptions.CacheChanged = true;
         }
 
 
@@ -464,9 +440,8 @@ public class BiomeVisualWindow : Window
             if (_startingCount == _totalTileCount) {
                 Log.Message("Biome counting is done!");
                 _currentlyCalculating = false;
-                _finishedCalculating = true;
 
-                foreach (var biomeData in _biomeSpecificDict.Values) {
+                foreach (ListOfTileSpecifics biomeData in _biomeSpecificDict.Values) {
                     _layerMaxRainFall = Math.Max(_layerMaxRainFall, biomeData.BiomeMaxRainFall);
                     _layerMinRainFall = Math.Min(_layerMinRainFall, biomeData.BiomeMinRainFall);
                     _layerMaxElevation = Math.Max(_layerMaxElevation, biomeData.BiomeMaxElevation);
@@ -556,14 +531,14 @@ public class BiomeVisualWindow : Window
 
 
     public BiomeVisualWindow() {
-        this.draggable = true;
-        this.focusWhenOpened = false;
-        this.drawShadow = false;
-        this.closeOnAccept = false;
-        this.closeOnCancel = false;
-        this.preventCameraMotion = false;
-        this.drawInScreenshotMode = false;
-        this.onlyDrawInDevMode = true;
-        this.doCloseX = true;
+        draggable = true;
+        focusWhenOpened = false;
+        drawShadow = false;
+        closeOnAccept = false;
+        closeOnCancel = false;
+        preventCameraMotion = false;
+        drawInScreenshotMode = false;
+        onlyDrawInDevMode = true;
+        doCloseX = true;
     }
 }

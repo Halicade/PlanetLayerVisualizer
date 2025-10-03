@@ -16,8 +16,8 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
     public override bool Visible {
         get
         {
-            if (base.Visible && TryGetWindow(out var window)) {
-                return window.Settings.Alpha > 0f;
+            if (base.Visible && Find.WindowStack.IsOpen<BiomeVisualWindow>()) {
+                return SettingsOptions.Alpha > 0f;
             }
 
             return false;
@@ -28,16 +28,8 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
 
     public override bool VisibleInBackground => false;
 
-    private static bool TryGetWindow(out BiomeVisualWindow window) {
-        return Find.WindowStack.TryGetWindow<BiomeVisualWindow>(out window);
-    }
-
-    private SettingsOptions _settings;
-
     public override IEnumerable Regenerate() {
-        TryGetWindow(out var window);
-        _settings = window.Settings;
-
+        Find.WindowStack.TryGetWindow<BiomeVisualWindow>(out var window);
 
         foreach (object item in base.Regenerate()) {
             yield return item;
@@ -64,21 +56,21 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
             PlanetTile tileForID = planetLayer.PlanetTileForID(i);
             //Vector3 tileCenter = Find.WorldGrid.GetTileCenter(new PlanetTile(i, planetLayer));
             //num is originally the perlin. Now the rainfall
-            if (!_settings.countImpassable) {
+            if (!SettingsOptions.countImpassable) {
                 if (!Find.WorldPathGrid.PassableFast(tileForID)) {
                     continue;
                 }
             }
 
-            float valueLookingAt = defLookingAt.Worker.RetrieveData(tileForID, _settings.TileLookingAt);
+            float valueLookingAt = defLookingAt.Worker.RetrieveData(tileForID, SettingsOptions.TileLookingAt);
 
-            if ((!_settings.InvertCutoff
-                 && _settings.Cutoff != 0f
-                 && valueLookingAt < _settings.Cutoff
-                 && _settings.CutoffEnabled)
-                || (_settings.InvertCutoff
-                    && !Mathf.Approximately(_settings.Cutoff, defLookingAt.expectedMinMaxValue.max)
-                    && valueLookingAt > _settings.Cutoff && _settings.CutoffEnabled)) {
+            if ((!SettingsOptions.InvertCutoff
+                 && SettingsOptions.Cutoff != 0f
+                 && valueLookingAt < SettingsOptions.Cutoff
+                 && SettingsOptions.CutoffEnabled)
+                || (SettingsOptions.InvertCutoff
+                    && !Mathf.Approximately(SettingsOptions.Cutoff, defLookingAt.expectedMinMaxValue.max)
+                    && valueLookingAt > SettingsOptions.Cutoff && SettingsOptions.CutoffEnabled)) {
                 continue;
             }
 
@@ -97,7 +89,7 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
                 subMesh.verts.Add(unsafeVerts[j]);
 
                 subMesh.colors.Add(defLookingAt.Worker.RetrieveColor(valueLookingAt, defLookingAt)
-                    .WithAlpha(_settings.Alpha));
+                    .WithAlpha(SettingsOptions.Alpha));
 
                 //original was for grayscale. Works better for Large variance
                 //subMesh.colors.Add(new Color32(rainValue, rainValue, rainValue, alphaValue));
