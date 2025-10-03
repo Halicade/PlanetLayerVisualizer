@@ -427,18 +427,17 @@ public class BiomeVisualWindow : Window
                     biomeLookingAt.AddTileSpecifics(_listOfLayersTiles[currentValueAt].tile.Tile);
                 }
                 else {
-                    Log.Message(
-                        "We are adding a new biome " + _listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome);
+                    //Log.Message("We are adding a new biome " + _listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome);
                     _biomeSpecificDict.Add(_listOfLayersTiles[currentValueAt].tile.Tile.PrimaryBiome.GetHashCode(),
                         new ListOfTileSpecifics(_listOfLayersTiles[currentValueAt].tile.Tile));
                 }
             }
 
             _startingCount = countToReach;
-            Log.Message("Current count total " + _startingCount + " remaining " + (_totalTileCount - _startingCount));
+            //Log.Message("Current count total " + _startingCount + " remaining " + (_totalTileCount - _startingCount));
             int prevTileCount = 0;
             if (_startingCount == _totalTileCount) {
-                Log.Message("Biome counting is done!");
+                //Log.Message("Biome counting is done!");
                 _currentlyCalculating = false;
 
                 foreach (ListOfTileSpecifics biomeData in _biomeSpecificDict.Values) {
@@ -524,7 +523,7 @@ public class BiomeVisualWindow : Window
                 );
 
 
-                Log.Message("Planet layer calculations completed!");
+                //Log.Message("Planet layer calculations completed!");
             }
         }
     }
