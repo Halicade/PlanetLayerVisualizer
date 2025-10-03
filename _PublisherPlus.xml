@@ -3,9 +3,6 @@
   <Excluded>
     <exclude>.git</exclude>
     <exclude>.idea</exclude>
-    <exclude>.run</exclude>
-    <exclude>PlanetLayerVisualizer.sln</exclude>
-    <exclude>packages</exclude>
-    <exclude>Source</exclude>
+    <exclude>Source\obj</exclude>
   </Excluded>
 </Configuration>
