@@ -56,7 +56,7 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
             PlanetTile tileForID = planetLayer.PlanetTileForID(i);
             //Vector3 tileCenter = Find.WorldGrid.GetTileCenter(new PlanetTile(i, planetLayer));
             //num is originally the perlin. Now the rainfall
-            if (!SettingsOptions.countImpassable) {
+            if (!SettingsOptions.CountImpassable) {
                 if (!Find.WorldPathGrid.PassableFast(tileForID)) {
                     continue;
                 }
@@ -66,11 +66,10 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
 
             if ((!SettingsOptions.InvertCutoff
                  && SettingsOptions.Cutoff != 0f
-                 && valueLookingAt < SettingsOptions.Cutoff
-                 && SettingsOptions.CutoffEnabled)
+                 && valueLookingAt < SettingsOptions.Cutoff)
                 || (SettingsOptions.InvertCutoff
                     && !Mathf.Approximately(SettingsOptions.Cutoff, defLookingAt.expectedMinMaxValue.max)
-                    && valueLookingAt > SettingsOptions.Cutoff && SettingsOptions.CutoffEnabled)) {
+                    && valueLookingAt > SettingsOptions.Cutoff)) {
                 continue;
             }
 

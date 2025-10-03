@@ -213,13 +213,13 @@ public class BiomeVisualWindow : Window
         Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedElevation".Translate(_selectedElevation));
         Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedPollution".Translate(_selectedPollution));
 
-        bool cachedImpassable = SettingsOptions.countImpassable;
+        bool cachedImpassable = SettingsOptions.CountImpassable;
         Widgets.CheckboxLabeled(new Rect(_rightColumn.x, yValue, _rightColumn.width / 2, Widgets.CheckboxSize),
             "PLV_CountImpassable".Translate(), ref cachedImpassable);
         yValue += Widgets.CheckboxSize + 10;
 
-        if (!cachedImpassable.Equals(SettingsOptions.countImpassable)) {
-            SettingsOptions.countImpassable = cachedImpassable;
+        if (!cachedImpassable.Equals(SettingsOptions.CountImpassable)) {
+            SettingsOptions.CountImpassable = cachedImpassable;
             SettingsOptions.CacheChanged = true;
         }
 
