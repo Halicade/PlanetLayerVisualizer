@@ -1,5 +1,6 @@
 ﻿using RimWorld.Planet;
 using UnityEngine;
+using Verse;
 
 namespace PlanetLayerVisualizer;
 
@@ -11,21 +12,22 @@ public abstract class VisualLayer
 
     /// <param name="value">Normally retrieved through RetrieveData</param>
     /// <param name="visualDef">Def looking at for values being used</param>
+    /// <param name="AlphaValue"></param>
     /// <returns>Color in RGB format</returns>
-    public virtual Color RetrieveColor(float value, VisualizerDef visualDef) {
+    public virtual Color RetrieveColor(float value, VisualizerDef visualDef, float AlphaValue) {
         if (value <= visualDef.minValue)
-            return visualDef.colorStart;
+            return visualDef.colorStart.WithAlpha(AlphaValue);
         float intervalValue = (visualDef.maxValue - visualDef.minValue) / visualDef.steps;
         float currentValue = visualDef.minValue;
         for (int i = 0; i < visualDef.steps; i++) {
             if (currentValue > value) {
                 return Color.Lerp(visualDef.colorStart, visualDef.colorEnd,
-                    (float)i / visualDef.steps);
+                    (float)i / visualDef.steps).WithAlpha((AlphaValue));
             }
 
             currentValue += intervalValue;
         }
 
-        return visualDef.colorEnd;
+        return visualDef.colorEnd.WithAlpha(AlphaValue);
     }
 }

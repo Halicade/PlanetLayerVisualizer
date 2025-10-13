@@ -113,5 +113,30 @@
         <displayPriority>92</displayPriority>
     </PlanetLayerVisualizer.VisualizerDef>
     
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_LandMark</defName>
+        <label>landmark</label>
+        <VisualLayerClass>PlanetLayerVisualizer.LandmarkVisualLayer</VisualLayerClass>
+        <minValue>0</minValue>
+        <maxValue>1</maxValue>
+        <expectedMinMaxValue>0~1</expectedMinMaxValue>
+        <steps>3</steps>
+        <colorStart>(219,67,37)</colorStart>
+        <colorEnd>(0, 97, 100)</colorEnd>
+        <displayPriority>91</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
+
+    <PlanetLayerVisualizer.VisualizerDef>
+        <defName>PLV_Mutators</defName>
+        <label>mutators</label>
+        <VisualLayerClass>PlanetLayerVisualizer.MutatorCountVisualLayer</VisualLayerClass>
+        <minValue>0</minValue>
+        <maxValue>4</maxValue>
+        <expectedMinMaxValue>0~10</expectedMinMaxValue>
+        <steps>4</steps>
+        <colorStart>(0,255,0)</colorStart>
+        <colorEnd>(0, 0, 0)</colorEnd>
+        <displayPriority>90</displayPriority>
+    </PlanetLayerVisualizer.VisualizerDef>
 
 </Defs>

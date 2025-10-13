@@ -1,5 +1,6 @@
 ﻿using RimWorld.Planet;
 using UnityEngine;
+using Verse;
 
 namespace PlanetLayerVisualizer;
 
@@ -9,9 +10,9 @@ public class CurTempVisualLayer : VisualLayer
         return tile.Tile.temperature;
     }
 
-    public override Color RetrieveColor(float value, VisualizerDef visualDef) {
+    public override Color RetrieveColor(float value, VisualizerDef visualDef, float AlphaValue) {
         if (value <= visualDef.minValue)
-            return visualDef.colorStart;
+            return visualDef.colorStart.WithAlpha(AlphaValue);
         float intervalValue = (visualDef.maxValue - visualDef.minValue) / visualDef.steps;
         float currentValue = visualDef.minValue;
         for (int i = 0; i < visualDef.steps; i++) {
@@ -22,12 +23,12 @@ public class CurTempVisualLayer : VisualLayer
                 return Color.HSVToRGB(Mathf.Lerp(startHue, endHue, (float)i / visualDef.steps),
                     Mathf.Lerp(startSat, endSat, (float)i / visualDef.steps),
                     Mathf.Lerp(startVal, endVal, (float)i / visualDef.steps)
-                );
+                ).WithAlpha(AlphaValue);
             }
 
             currentValue += intervalValue;
         }
 
-        return visualDef.colorEnd;
+        return visualDef.colorEnd.WithAlpha(AlphaValue);
     }
 }

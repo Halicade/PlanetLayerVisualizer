@@ -87,8 +87,8 @@ public class WorldDrawLayer_ShowVisuals : WorldDrawLayer
             for (int j = unsafeTileIDToVertsOffsets[i]; j < num3; j++) {
                 subMesh.verts.Add(unsafeVerts[j]);
 
-                subMesh.colors.Add(defLookingAt.Worker.RetrieveColor(valueLookingAt, defLookingAt)
-                    .WithAlpha(SettingsOptions.Alpha));
+                subMesh.colors.Add(defLookingAt.Worker.RetrieveColor(valueLookingAt, defLookingAt, SettingsOptions.Alpha)
+                );
 
                 //original was for grayscale. Works better for Large variance
                 //subMesh.colors.Add(new Color32(rainValue, rainValue, rainValue, alphaValue));
