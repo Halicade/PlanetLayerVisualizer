@@ -6,8 +6,11 @@
     <PLV_SelectedCoordinates>Coordinates: {0}</PLV_SelectedCoordinates>
     <PLV_SelectedBiome>Biome: {0}\ndefName: {1}\nmod: {2}</PLV_SelectedBiome>
     <PLV_SelectedRainfall>Rainfall: {0}</PLV_SelectedRainfall>
-    <PLV_SelectedElevation>Elevation {0}</PLV_SelectedElevation>
-    <PLV_SelectedPollution>Pollution {0}</PLV_SelectedPollution>
+    <PLV_SelectedElevation>Elevation: {0}</PLV_SelectedElevation>
+    <PLV_SelectedPollution>Pollution: {0}</PLV_SelectedPollution>
+    <PLV_SelectedMutatorCount>Landmark Count: {0}</PLV_SelectedMutatorCount>
+    <PLV_SelectedTemperature>Temperature: {0}</PLV_SelectedTemperature>
+    <PLV_SelectedStoneCount>Stone count: {0}</PLV_SelectedStoneCount>
     
     <PLV_BiomeScoreDisplay>Biome: {0} Score:{1}</PLV_BiomeScoreDisplay>
     <PLV_BiomeWord>Biome</PLV_BiomeWord>

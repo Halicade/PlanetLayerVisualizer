@@ -31,6 +31,11 @@ public class BiomeVisualWindow : Window
     private float _layerAvgPollution;
 
     private int _layerLandmarkCount;
+    private int _selectedMutatorCount;
+    private string _selectedTemperature;
+    private int _selectedStoneCount;
+
+    private readonly Color _grayLineColor = new(0.6f, 0.6f, 0.6f);
 
     private readonly int _totalBiomeCount = DefDatabase<BiomeDef>.DefCount;
 
@@ -105,6 +110,7 @@ public class BiomeVisualWindow : Window
 
     private Rect _biomeScoreCol;
     private Rect _rightColumn;
+    private Rect _rightColumnRightPart;
 
 
     private bool _initialLoad = true;
@@ -114,11 +120,11 @@ public class BiomeVisualWindow : Window
         if (!Find.World.renderer.TryGetLayer<WorldDrawLayer_ShowVisuals>(PlanetLayer.Selected, out var _)) return;
         //For some reason, the font likes to change size if dev mode window is open. 
         Text.Font = GameFont.Small;
-        
+
         if (_initialLoad) {
             _leftColumn = rect.LeftPart(0.33f);
             _rightColumn = rect.RightPart(0.65f);
-
+            _rightColumnRightPart = _rightColumn.RightPart(0.45f);
             _leftOutRect = new Rect(_leftColumn.x, _leftColumn.y + SliderHeight, _leftColumn.width,
                 _leftColumn.height - SliderHeight);
             _biomeColViewRect = new Rect(_leftColumn.x, _leftColumn.y,
@@ -205,18 +211,31 @@ public class BiomeVisualWindow : Window
         }
 
         yValue += 20;
+        float yValueRight = yValue;
+        Widgets.Label(_rightColumn, ref yValue,
+            "PLV_SelectedBiome".Translate(
+                _selectedBiome.label,
+                _selectedBiome.defName,
+                _selectedBiome?.modContentPack?.PackageId));
 
-        Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedBiome".Translate(_selectedBiome.label,
-            _selectedBiome.defName,
-            _selectedBiome?.modContentPack?.PackageId));
         Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedRainfall".Translate(_selectedRainFall));
         Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedElevation".Translate(_selectedElevation));
         Widgets.Label(_rightColumn, ref yValue, "PLV_SelectedPollution".Translate(_selectedPollution));
 
+        Widgets.Label(_rightColumnRightPart, ref yValueRight,
+            "PLV_SelectedMutatorCount".Translate(_selectedMutatorCount));
+
+        Widgets.Label(_rightColumnRightPart, ref yValueRight,
+            "PLV_SelectedTemperature".Translate(_selectedTemperature));
+
+        Widgets.Label(_rightColumnRightPart, ref yValueRight, "PLV_SelectedStoneCount".Translate(_selectedStoneCount));
+        yValue += 4;
+        Widgets.DrawLineHorizontal(_rightColumn.x, yValue, _rightColumn.width, _grayLineColor);
+        yValue += 4;
         bool cachedImpassable = SettingsOptions.CountImpassable;
         Widgets.CheckboxLabeled(new Rect(_rightColumn.x, yValue, _rightColumn.width / 2, Widgets.CheckboxSize),
             "PLV_CountImpassable".Translate(), ref cachedImpassable);
-        yValue += Widgets.CheckboxSize + 10;
+        yValue += Widgets.CheckboxSize + 14;
 
         if (!cachedImpassable.Equals(SettingsOptions.CountImpassable)) {
             SettingsOptions.CountImpassable = cachedImpassable;
@@ -363,6 +382,9 @@ public class BiomeVisualWindow : Window
         _selectedRainFall = _selectedPlanetTile.Tile.rainfall;
         _selectedElevation = _selectedTile.elevation;
         _selectedPollution = _selectedTile.pollution;
+        _selectedMutatorCount = _selectedPlanetTile.Tile.Mutators.Count;
+        _selectedTemperature = _selectedPlanetTile.Tile.temperature.ToStringTemperature();
+        _selectedStoneCount = Find.World.NaturalRockTypesIn(_selectedPlanetTile).Count();
 
         SettingsOptions.TileLookingAt = _selectedPlanetTile.Tile;
 
