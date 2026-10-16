@@ -22,11 +22,11 @@ internal class Harmony_Initializer : Mod
 
         harmony.Patch(AccessTools.Method(typeof(PlaySettings), "DoWorldViewControls"),
             postfix: new HarmonyMethod(PatchType, nameof(WorldViewControlsPostFix)));
-        
+
     }
 
     private static void WorldViewControlsPostFix(WidgetRow row) {
-        if (row.ButtonIcon(Resources.VisualizerButton)) {
+        if (row.ButtonIcon(Resources.VisualizerButton, "PLV_OpenVisualizer".Translate())) {
             Find.WindowStack.Add(new BiomeVisualWindow());
         }
     }

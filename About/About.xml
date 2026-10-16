@@ -4,6 +4,7 @@
 	<author>Halicade</author>
 	<supportedVersions>
 		<li>1.6</li>
+		<li>1.7</li>
 	</supportedVersions>
 	<packageId>Hali.PlanetLayerVisualizer</packageId>
 	<description>Display fancy visuals for your world.</description>

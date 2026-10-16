@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+    <PLV_OpenVisualizer>Open Planet Layer Visualizer</PLV_OpenVisualizer>
+    
     <PLV_NoSelection>No tile selected</PLV_NoSelection>
     <PLV_EnableUpdating>Enable updating?</PLV_EnableUpdating>
     <PLV_SelectedTile>Selected tile: {0}</PLV_SelectedTile>
